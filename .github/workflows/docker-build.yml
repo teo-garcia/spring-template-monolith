@@ -1,0 +1,15 @@
+name: Docker Build
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    tags: ["v*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build image (no push)
+        run: docker build -f docker/Dockerfile -t spring-template-monolith:ci .

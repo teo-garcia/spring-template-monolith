@@ -1,0 +1,98 @@
+server:
+  port: ${PORT:3000}
+  shutdown: graceful
+  error:
+    include-stacktrace: never
+    include-message: never
+
+spring:
+  application:
+    name: ${APP_NAME:spring-template-monolith}
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/spring_monolith}
+    username: ${DATABASE_USER:postgres}
+    password: ${DATABASE_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DATABASE_POOL_MAX:10}
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 2000
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 1
+
+app:
+  env: ${NODE_ENV:development}
+  api-prefix: ${API_PREFIX:/api/v1}
+  version: ${API_VERSION:1}
+  shutdown-timeout: ${SHUTDOWN_TIMEOUT:10000}
+  docs-enabled: ${DOCS_ENABLED:true}
+  openapi-server-url: ${OPENAPI_SERVER_URL:http://localhost:${PORT:3000}}
+  cors-enabled: ${CORS_ENABLED:true}
+  cors-origin: ${CORS_ORIGIN:http://localhost:3000}
+  throttle-ttl: ${THROTTLE_TTL:60}
+  throttle-limit: ${THROTTLE_LIMIT:100}
+  metrics-enabled: ${METRICS_ENABLED:true}
+  log-level: ${LOG_LEVEL:debug}
+  log-output: ${LOG_OUTPUT:console}
+  otel-enabled: ${OTEL_ENABLED:true}
+  otel-service-name: ${OTEL_SERVICE_NAME:spring-template-monolith}
+  otel-endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
+  redis-ttl: ${REDIS_TTL:3600}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,info
+      base-path: /actuator
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+    prometheus:
+      enabled: true
+  health:
+    db:
+      enabled: true
+    redis:
+      enabled: true
+  metrics:
+    tags:
+      application: ${app.otel-service-name}
+
+springdoc:
+  api-docs:
+    path: /openapi.json
+  swagger-ui:
+    path: /docs
+    operationsSorter: method
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+    com.teogarcia.springmonolith: ${LOG_LEVEL:DEBUG}

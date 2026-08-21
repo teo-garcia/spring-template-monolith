@@ -1,0 +1,16 @@
+target
+.mvn
+.git
+.gitignore
+.github
+.idea
+*.iml
+.vscode
+*.log
+.env
+.env.*
+!.env.example
+coverage
+logs
+.DS_Store
+README.md
