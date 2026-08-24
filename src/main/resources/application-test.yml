@@ -22,10 +22,11 @@ app:
   cors-enabled: false
   throttle-limit: 1000
   metrics-enabled: true
-  otel-enabled: false
   docs-enabled: true
 
 management:
+  opentelemetry:
+    enabled: false
   endpoints:
     web:
       exposure:
@@ -35,4 +36,4 @@ management:
 logging:
   level:
     root: WARN
-    com.teogarcia.springmonolith: DEBUG
+    com.teogarcia.springmonolith: WARN

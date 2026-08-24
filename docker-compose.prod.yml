@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME:-spring_monolith}
-    volumes:
+    volumes: !override
       - postgres_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER}"]
@@ -15,38 +15,37 @@ services:
       retries: 5
     networks:
       - spring-network
-    ports: []
+    ports: !reset []
 
   redis:
     image: redis:alpine
     restart: unless-stopped
-    volumes:
+    volumes: !override
       - redis_data:/data
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - spring-network
-    ports: []
+    ports: !reset []
 
   app:
     build:
       context: .
       dockerfile: docker/Dockerfile
     environment:
-      NODE_ENV: production
+      APP_ENV: production
+      SPRING_PROFILES_ACTIVE: production
       PORT: ${PORT:-3000}
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: jdbc:postgresql://db:5432/${DATABASE_NAME:-spring_monolith}
       REDIS_HOST: redis
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      OTEL_ENABLED: ${OTEL_ENABLED:-false}
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:-http://otel-collector:4318/v1/traces}
-    depends_on:
+    depends_on: !override
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
+    ports: !reset []
+    volumes: !reset []
     networks:
       - spring-network
 
@@ -60,6 +59,9 @@ services:
       - app
     networks:
       - spring-network
+
+  migrate: !reset null
+  pgadmin: !reset null
 
 volumes:
   postgres_data:

@@ -37,7 +37,7 @@ public class TasksService {
             req.description(),
             req.status() != null ? req.status() : TaskStatus.PENDING,
             req.priority() != null ? req.priority() : 0);
-    task = repository.save(task);
+    task = repository.saveAndFlush(task);
     log.info("Created task {}", task.getId());
     return TaskResponse.from(task);
   }
@@ -74,7 +74,7 @@ public class TasksService {
     if (req.description() != null) task.setDescription(req.description());
     if (req.status() != null) task.setStatus(req.status());
     if (req.priority() != null) task.setPriority(req.priority());
-    task = repository.save(task);
+    task = repository.saveAndFlush(task);
     log.info("Updated task {}", id);
     return TaskResponse.from(task);
   }

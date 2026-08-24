@@ -1,16 +1,19 @@
 .PHONY: dev build start start-prod lint lint-check format format-check test coverage check db-migrate db-deploy db-seed docker-dev
 
+ENV_FILE ?= .env
+RUN_WITH_ENV = set -e; set -a; [ ! -f "$(ENV_FILE)" ] || . "./$(ENV_FILE)"; set +a;
+
 dev:
-	./mvnw spring-boot:run
+	@$(RUN_WITH_ENV) exec ./mvnw -q spring-boot:run
 
 build:
 	./mvnw -B package -DskipTests
 
 start:
-	java -jar target/*.jar
+	@$(RUN_WITH_ENV) exec java --enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow -jar target/*.jar
 
 start-prod:
-	java -jar target/*.jar
+	@$(RUN_WITH_ENV) exec java --enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow -jar target/*.jar
 
 lint: lint-check
 
@@ -27,25 +30,24 @@ test:
 	./mvnw -B test
 
 coverage:
-	./mvnw -B verify
+	./mvnw -B verify -Pcoverage
 
 check: lint-check format-check test
-	./mvnw -B verify -DskipTests=false
 
 db-migrate:
-	./mvnw -B flyway:migrate
+	@$(RUN_WITH_ENV) ./mvnw -B flyway:migrate
 
 db-deploy:
-	./mvnw -B flyway:migrate
+	@$(RUN_WITH_ENV) ./mvnw -B flyway:migrate
 
 db-seed:
-	./mvnw -B spring-boot:run -Dspring-boot.run.arguments="--app.seed=true"
+	@$(RUN_WITH_ENV) ./mvnw -B spring-boot:run -Dspring-boot.run.arguments="--app.seed=true"
 
 db-reset:
-	./mvnw -B flyway:clean -Dflyway.cleanDisabled=false && ./mvnw -B flyway:migrate
+	@$(RUN_WITH_ENV) ./mvnw -B flyway:clean -Dflyway.cleanDisabled=false && ./mvnw -B flyway:migrate
 
 docker-dev:
-	docker compose up -d db redis
+	docker compose up --build
 
 docker-build:
 	docker build -f docker/Dockerfile -t spring-template-monolith .

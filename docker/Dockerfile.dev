@@ -1,4 +1,4 @@
-FROM maven:3.9-eclipse-temurin-21-alpine
+FROM maven:3.9-eclipse-temurin-25-alpine
 
 WORKDIR /app
 
@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 3000
 
-CMD ["mvn", "spring-boot:run", "-Dspring-boot.run.jvmArguments=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"]
+CMD ["mvn", "-q", "spring-boot:run", "-Dspring-boot.run.jvmArguments=--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"]

@@ -6,8 +6,14 @@ server:
     include-message: never
 
 spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:development}
+  main:
+    banner-mode: off
   application:
     name: ${APP_NAME:spring-template-monolith}
+  lifecycle:
+    timeout-per-shutdown-phase: ${SHUTDOWN_TIMEOUT:10s}
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/spring_monolith}
     username: ${DATABASE_USER:postgres}
@@ -25,13 +31,11 @@ spring:
     open-in-view: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
         jdbc.time_zone: UTC
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migration
-    baseline-on-migrate: true
   data:
     redis:
       host: ${REDIS_HOST:localhost}
@@ -43,12 +47,14 @@ spring:
           max-active: 8
           max-idle: 8
           min-idle: 1
+      repositories:
+        enabled: false
 
 app:
-  env: ${NODE_ENV:development}
+  env: ${APP_ENV:development}
   api-prefix: ${API_PREFIX:/api/v1}
   version: ${API_VERSION:1}
-  shutdown-timeout: ${SHUTDOWN_TIMEOUT:10000}
+  shutdown-timeout: ${SHUTDOWN_TIMEOUT:10s}
   docs-enabled: ${DOCS_ENABLED:true}
   openapi-server-url: ${OPENAPI_SERVER_URL:http://localhost:${PORT:3000}}
   cors-enabled: ${CORS_ENABLED:true}
@@ -56,12 +62,8 @@ app:
   throttle-ttl: ${THROTTLE_TTL:60}
   throttle-limit: ${THROTTLE_LIMIT:100}
   metrics-enabled: ${METRICS_ENABLED:true}
-  log-level: ${LOG_LEVEL:debug}
-  log-output: ${LOG_OUTPUT:console}
-  otel-enabled: ${OTEL_ENABLED:true}
+  log-level: ${LOG_LEVEL:info}
   otel-service-name: ${OTEL_SERVICE_NAME:spring-template-monolith}
-  otel-endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
-  redis-ttl: ${REDIS_TTL:3600}
 
 management:
   endpoints:
@@ -84,15 +86,23 @@ management:
   metrics:
     tags:
       application: ${app.otel-service-name}
+  otlp:
+    metrics:
+      export:
+        enabled: false
+  opentelemetry:
+    enabled: ${OTEL_ENABLED:false}
 
 springdoc:
   api-docs:
+    enabled: ${DOCS_ENABLED:true}
     path: /openapi.json
   swagger-ui:
+    enabled: ${DOCS_ENABLED:true}
     path: /docs
     operationsSorter: method
 
 logging:
   level:
-    root: ${LOG_LEVEL:INFO}
-    com.teogarcia.springmonolith: ${LOG_LEVEL:DEBUG}
+    root: WARN
+    com.teogarcia.springmonolith: ${LOG_LEVEL:INFO}

@@ -2,8 +2,8 @@ package com.teogarcia.springmonolith.shared.health;
 
 import java.util.Map;
 
-import org.springframework.boot.actuate.health.HealthComponent;
-import org.springframework.boot.actuate.health.HealthEndpoint;
+import org.springframework.boot.health.actuate.endpoint.HealthDescriptor;
+import org.springframework.boot.health.actuate.endpoint.HealthEndpoint;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,8 +29,8 @@ public class HealthController {
   }
 
   @GetMapping("/ready")
-  public ResponseEntity<HealthComponent> ready() {
-    HealthComponent health = healthEndpoint.health();
+  public ResponseEntity<HealthDescriptor> ready() {
+    HealthDescriptor health = healthEndpoint.health();
     if (health.getStatus().getCode().equals("UP")) {
       return ResponseEntity.ok(health);
     }
@@ -38,8 +38,8 @@ public class HealthController {
   }
 
   @GetMapping
-  public ResponseEntity<HealthComponent> health() {
-    HealthComponent health = healthEndpoint.health();
+  public ResponseEntity<HealthDescriptor> health() {
+    HealthDescriptor health = healthEndpoint.health();
     // Align degraded semantics: DOWN -> degraded/503, UP -> 200
     if (health.getStatus().getCode().equals("UP")) {
       return ResponseEntity.ok(health);

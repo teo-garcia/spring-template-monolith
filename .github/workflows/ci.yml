@@ -41,14 +41,14 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "25"
           cache: maven
       - name: Lint (checkstyle + spotless)
         run: mvn -B checkstyle:check spotless:check
       - name: Build
         run: mvn -B package -DskipTests
       - name: Tests + Coverage
-        run: mvn -B verify
+        run: mvn -B verify -Pcoverage
         env:
           DATABASE_URL: jdbc:postgresql://localhost:5432/spring_monolith_test
           DATABASE_USER: postgres

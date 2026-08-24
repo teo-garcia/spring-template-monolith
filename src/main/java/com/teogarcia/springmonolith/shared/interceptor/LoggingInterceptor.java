@@ -28,14 +28,12 @@ public class LoggingInterceptor implements HandlerInterceptor {
       HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
     Long start = (Long) request.getAttribute("_start");
     long durationMs = start != null ? (System.nanoTime() - start) / 1_000_000 : -1;
-    String rid = (String) request.getAttribute("requestId");
     log.info(
-        "{} {} {} {}ms{}",
+        "{} {} {} {}ms",
         request.getMethod(),
         request.getRequestURI(),
         response.getStatus(),
-        durationMs,
-        rid != null ? " " + rid : "");
+        durationMs);
     MDC.remove("method");
     MDC.remove("path");
   }

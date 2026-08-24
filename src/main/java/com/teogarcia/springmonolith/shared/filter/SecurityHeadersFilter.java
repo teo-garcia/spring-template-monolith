@@ -22,6 +22,9 @@ public class SecurityHeadersFilter extends OncePerRequestFilter {
     response.setHeader("Referrer-Policy", "no-referrer");
     response.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
     response.setHeader("Content-Security-Policy", "default-src 'self'; frame-ancestors 'none'");
+    if (request.isSecure()) {
+      response.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+    }
     chain.doFilter(request, response);
   }
 }

@@ -1,6 +1,7 @@
 package com.teogarcia.springmonolith.modules.tasks;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,8 +17,14 @@ import com.teogarcia.springmonolith.modules.tasks.dto.CreateTaskRequest;
 import com.teogarcia.springmonolith.modules.tasks.dto.PaginatedTasksResponse;
 import com.teogarcia.springmonolith.modules.tasks.dto.TaskResponse;
 import com.teogarcia.springmonolith.modules.tasks.dto.UpdateTaskRequest;
+import com.teogarcia.springmonolith.shared.exception.ErrorEnvelope;
+import com.teogarcia.springmonolith.shared.openapi.ApiEnvelopeSchemas.PaginatedTasksSuccessEnvelope;
+import com.teogarcia.springmonolith.shared.openapi.ApiEnvelopeSchemas.TaskSuccessEnvelope;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -34,6 +41,13 @@ public class TasksController {
 
   @GetMapping
   @Operation(summary = "List tasks with pagination")
+  @ApiResponse(
+      responseCode = "200",
+      description = "Paginated tasks",
+      content =
+          @Content(
+              mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = PaginatedTasksSuccessEnvelope.class)))
   public PaginatedTasksResponse list(
       @RequestParam(required = false) TaskStatus status,
       @RequestParam(required = false) Integer priority,
@@ -47,12 +61,40 @@ public class TasksController {
 
   @GetMapping("/{id}")
   @Operation(summary = "Get task by id")
+  @ApiResponse(
+      responseCode = "200",
+      description = "Task found",
+      content =
+          @Content(
+              mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = TaskSuccessEnvelope.class)))
+  @ApiResponse(
+      responseCode = "404",
+      description = "Task not found",
+      content =
+          @Content(
+              mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ErrorEnvelope.class)))
   public TaskResponse getOne(@PathVariable String id) {
     return service.findOne(id);
   }
 
   @PostMapping
   @Operation(summary = "Create task")
+  @ApiResponse(
+      responseCode = "201",
+      description = "Task created",
+      content =
+          @Content(
+              mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = TaskSuccessEnvelope.class)))
+  @ApiResponse(
+      responseCode = "422",
+      description = "Validation failed",
+      content =
+          @Content(
+              mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ErrorEnvelope.class)))
   public ResponseEntity<TaskResponse> create(@Valid @RequestBody CreateTaskRequest req) {
     TaskResponse created = service.create(req);
     return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -60,12 +102,41 @@ public class TasksController {
 
   @PatchMapping("/{id}")
   @Operation(summary = "Update task")
+  @ApiResponse(
+      responseCode = "200",
+      description = "Task updated",
+      content =
+          @Content(
+              mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = TaskSuccessEnvelope.class)))
+  @ApiResponse(
+      responseCode = "404",
+      description = "Task not found",
+      content =
+          @Content(
+              mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ErrorEnvelope.class)))
+  @ApiResponse(
+      responseCode = "422",
+      description = "Validation failed",
+      content =
+          @Content(
+              mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ErrorEnvelope.class)))
   public TaskResponse update(@PathVariable String id, @Valid @RequestBody UpdateTaskRequest req) {
     return service.update(id, req);
   }
 
   @DeleteMapping("/{id}")
   @Operation(summary = "Delete task (soft delete)")
+  @ApiResponse(responseCode = "204", description = "Task deleted", content = @Content)
+  @ApiResponse(
+      responseCode = "404",
+      description = "Task not found",
+      content =
+          @Content(
+              mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ErrorEnvelope.class)))
   public ResponseEntity<Void> delete(@PathVariable String id) {
     service.delete(id);
     return ResponseEntity.noContent().build();

@@ -1,10 +1,13 @@
 package com.teogarcia.springmonolith.config;
 
+import java.time.Duration;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Validated
 @ConfigurationProperties(prefix = "app")
@@ -12,7 +15,7 @@ public record AppProperties(
     @NotBlank String env,
     @NotBlank String apiPrefix,
     @NotBlank String version,
-    @Min(1000) long shutdownTimeout,
+    @NotNull Duration shutdownTimeout,
     boolean docsEnabled,
     @NotBlank String openapiServerUrl,
     boolean corsEnabled,
@@ -21,8 +24,4 @@ public record AppProperties(
     @Min(1) int throttleLimit,
     boolean metricsEnabled,
     @NotBlank String logLevel,
-    @NotBlank String logOutput,
-    boolean otelEnabled,
-    @NotBlank String otelServiceName,
-    @NotBlank String otelEndpoint,
-    @Min(1) int redisTtl) {}
+    @NotBlank String otelServiceName) {}

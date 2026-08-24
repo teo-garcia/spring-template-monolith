@@ -25,10 +25,7 @@ public class OpenApiConfig {
     return new OpenAPI()
         .info(
             new Info()
-                .title(
-                    props.env().equals("test")
-                        ? "Spring Monolith Template"
-                        : "Spring Monolith Template")
+                .title("Spring Monolith Template")
                 .version(props.version())
                 .description("Production-ready Spring Boot monolith — portfolio parity"))
         .servers(List.of(new Server().url(props.openapiServerUrl())));

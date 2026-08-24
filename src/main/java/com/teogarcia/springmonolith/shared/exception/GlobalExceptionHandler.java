@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
         .forEach(fe -> fieldErrors.put(fe.getField(), fe.getDefaultMessage()));
     return build(
         request,
-        HttpStatus.UNPROCESSABLE_ENTITY,
+        HttpStatus.UNPROCESSABLE_CONTENT,
         "Validation failed",
         "ValidationError",
         fieldErrors);
@@ -44,7 +44,7 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorEnvelope> handleConstraint(
       ConstraintViolationException ex, HttpServletRequest request) {
     return build(
-        request, HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage(), "ValidationError", null);
+        request, HttpStatus.UNPROCESSABLE_CONTENT, ex.getMessage(), "ValidationError", null);
   }
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -117,7 +117,7 @@ public class GlobalExceptionHandler {
     if (status.is5xxServerError()) {
       log.error("{} {} {} - {}", request.getMethod(), path, status.value(), message);
     } else {
-      log.warn("{} {} {} - {}", request.getMethod(), path, status.value(), message);
+      log.debug("{} {} {} - {}", request.getMethod(), path, status.value(), message);
     }
     return ResponseEntity.status(status).body(body);
   }
