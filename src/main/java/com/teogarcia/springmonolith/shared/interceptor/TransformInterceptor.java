@@ -90,6 +90,14 @@ public class TransformInterceptor implements ResponseBodyAdvice<Object> {
     Map<String, Object> meta = new LinkedHashMap<>();
     if (requestId != null) meta.put("requestId", requestId);
     meta.put("version", props.version());
+    // Milliseconds, as a number, matching every other template. LoggingInterceptor
+    // records the start; if it did not run, omit rather than report a wrong value.
+    if (servletRequest != null) {
+      Object start = servletRequest.getAttribute("_start");
+      if (start instanceof Long startNanos) {
+        meta.put("duration", (System.nanoTime() - startNanos) / 1_000_000);
+      }
+    }
     envelope.put("meta", meta);
     return envelope;
   }

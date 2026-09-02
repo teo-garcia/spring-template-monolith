@@ -13,7 +13,7 @@ public final class ApiEnvelopeSchemas {
   private ApiEnvelopeSchemas() {}
 
   @Schema(name = "SuccessMeta")
-  public record SuccessMeta(String requestId, String version) {}
+  public record SuccessMeta(String requestId, String version, Long duration) {}
 
   @Schema(name = "TaskSuccessEnvelope")
   public record TaskSuccessEnvelope(

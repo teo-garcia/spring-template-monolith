@@ -14,6 +14,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.teogarcia.springmonolith.shared.filter.RequestIdFilter;
 
@@ -78,6 +79,16 @@ public class GlobalExceptionHandler {
   public ResponseEntity<ErrorEnvelope> handleNotFound(
       ResourceNotFoundException ex, HttpServletRequest request) {
     return build(request, HttpStatus.NOT_FOUND, ex.getMessage(), "NotFoundError", null);
+  }
+
+  /**
+   * An unmatched route raises NoResourceFoundException. Without this handler it falls through to
+   * handleUnknown and every 404 is reported as a 500.
+   */
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<ErrorEnvelope> handleNoResource(
+      NoResourceFoundException ex, HttpServletRequest request) {
+    return build(request, HttpStatus.NOT_FOUND, "Resource not found", "NotFoundError", null);
   }
 
   @ExceptionHandler(Exception.class)
