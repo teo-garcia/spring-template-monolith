@@ -68,6 +68,9 @@ class TasksControllerTest {
     mockMvc
         .perform(get("/api/v1/tasks").param("page", "1").param("pageSize", "10"))
         .andExpect(status().isOk())
+        .andExpect(header().exists("X-RateLimit-Limit"))
+        .andExpect(header().exists("X-RateLimit-Remaining"))
+        .andExpect(header().exists("X-RateLimit-Reset"))
         .andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.data.data").isArray())
         .andExpect(jsonPath("$.data.meta.total").isNumber());

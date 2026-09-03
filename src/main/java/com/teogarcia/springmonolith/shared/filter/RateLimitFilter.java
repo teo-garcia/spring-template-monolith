@@ -54,12 +54,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
     if (nowSeconds - windowStart >= props.throttleTtl()) {
       window.start.set(nowSeconds);
       window.count.set(0);
+      windowStart = nowSeconds;
     }
     int count = window.count.incrementAndGet();
+    response.setHeader("X-RateLimit-Limit", String.valueOf(props.throttleLimit()));
+    response.setHeader(
+        "X-RateLimit-Remaining", String.valueOf(Math.max(0, props.throttleLimit() - count)));
+    response.setHeader("X-RateLimit-Reset", String.valueOf(windowStart + props.throttleTtl()));
     if (count <= props.throttleLimit()) {
-      response.setHeader("X-RateLimit-Limit", String.valueOf(props.throttleLimit()));
-      response.setHeader(
-          "X-RateLimit-Remaining", String.valueOf(Math.max(0, props.throttleLimit() - count)));
       chain.doFilter(request, response);
     } else {
       response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
