@@ -4,8 +4,10 @@ services:
       OTEL_ENABLED: "true"
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://otel-collector:4318/v1/traces
     networks:
-      - spring-network
-      - templates-observability
+      spring-network:
+      templates-observability:
+        aliases:
+          - spring-template-monolith
 
 networks:
   spring-network:
