@@ -41,14 +41,12 @@ jobs:
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: "25"
+          java-version: "25.0.4"
           cache: maven
-      - name: Lint (checkstyle + spotless)
-        run: mvn -B checkstyle:check spotless:check
-      - name: Build
-        run: mvn -B package -DskipTests
-      - name: Tests + Coverage
-        run: mvn -B verify -Pcoverage
+      - name: Record Java runtime
+        run: java -version
+      - name: Check
+        run: make check
         env:
           DATABASE_URL: jdbc:postgresql://localhost:5432/spring_monolith_test
           DATABASE_USER: postgres
@@ -56,6 +54,8 @@ jobs:
           DATABASE_NAME: spring_monolith_test
           REDIS_HOST: localhost
           REDIS_PORT: 6379
+      - name: Build
+        run: make build
       - name: Upload coverage
         uses: actions/upload-artifact@v4
         if: always()
@@ -65,7 +65,7 @@ jobs:
           retention-days: 7
 
       - name: Migrate conformance database
-        run: mvn -B flyway:migrate
+        run: make db-deploy
         env:
           DATABASE_PASSWORD: postgres
           DATABASE_URL: jdbc:postgresql://localhost:5432/spring_monolith_test

@@ -32,7 +32,7 @@ Part of the [@teo-garcia/templates](https://github.com/teo-garcia/templates) eco
 
 ## Requirements
 
-- Java 25 LTS (Temurin recommended)
+- Java 25.0.4 or newer in the Java 25 LTS line (Temurin recommended)
 - `./mvnw` (Maven 3.9.16 is downloaded by the wrapper)
 - Docker and Docker Compose
 - PostgreSQL 18 + Redis (via Compose)
@@ -60,7 +60,7 @@ OpenAPI JSON at `/openapi.json`.
 | -------------------- | ---------------------------------------- |
 | `make dev`           | Load `.env` and start Spring Boot with concise Maven output |
 | `make build`         | Create production jar                    |
-| `make check`         | Run Checkstyle + format check + tests       |
+| `make check`         | Run Checkstyle + format check + tests + JaCoCo |
 | `make start`         | Run production jar (`java -jar target/*.jar`) |
 | `make test`          | Run unit tests                           |
 | `make coverage`      | Run tests with JaCoCo (`target/site/jacoco`) |

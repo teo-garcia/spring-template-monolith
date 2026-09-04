@@ -20,6 +20,7 @@
 
     <properties>
         <java.version>25</java.version>
+        <java.minimum.version>25.0.4</java.minimum.version>
         <springdoc.version>3.0.3</springdoc.version>
         <logstash.version>8.0</logstash.version>
         <jacoco.version>0.8.15</jacoco.version>
@@ -104,6 +105,24 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.6.2</version>
+                <executions>
+                    <execution>
+                        <id>enforce-java</id>
+                        <goals><goal>enforce</goal></goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>[${java.minimum.version},26)</version>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

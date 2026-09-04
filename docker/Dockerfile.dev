@@ -1,4 +1,4 @@
-FROM maven:3.9-eclipse-temurin-25-alpine
+FROM maven:3.9-eclipse-temurin-25-alpine@sha256:21e373f51c0b14c9c76d415033f4eb145d1c0b59cd227a3ec5cc1c78002c6da8
 
 WORKDIR /app
 

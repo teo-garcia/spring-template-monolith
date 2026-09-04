@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-FROM maven:3.9-eclipse-temurin-25-alpine AS builder
+FROM maven:3.9-eclipse-temurin-25-alpine@sha256:21e373f51c0b14c9c76d415033f4eb145d1c0b59cd227a3ec5cc1c78002c6da8 AS builder
 WORKDIR /app
 COPY pom.xml ./
 COPY checkstyle.xml ./
@@ -8,7 +8,7 @@ RUN mvn -B dependency:go-offline
 COPY src ./src
 RUN mvn -B package -DskipTests
 
-FROM eclipse-temurin:25-jre-alpine AS production
+FROM eclipse-temurin:25-jre-alpine@sha256:3137541deb3cac6626b5d9a4a2187bc0d6a34312f858bd2c67dd01e732e6b682 AS production
 RUN apk add --no-cache dumb-init wget
 
 RUN addgroup -g 1001 -S spring && adduser -S spring -u 1001

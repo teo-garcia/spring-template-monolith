@@ -32,7 +32,7 @@ test:
 coverage:
 	./mvnw -B verify -Pcoverage
 
-check: lint-check format-check test
+check: coverage
 
 db-migrate:
 	@$(RUN_WITH_ENV) ./mvnw -B flyway:migrate
