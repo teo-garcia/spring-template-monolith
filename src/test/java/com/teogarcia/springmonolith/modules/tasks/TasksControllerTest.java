@@ -12,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.jayway.jsonpath.JsonPath;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -100,5 +102,46 @@ class TasksControllerTest {
         .andExpect(jsonPath("$.success").value(false))
         .andExpect(jsonPath("$.error").value("NotFoundError"))
         .andExpect(header().exists("X-Request-ID"));
+  }
+
+  @Test
+  void taskLifecyclePreservesTheHttpContract() throws Exception {
+    String createdBody =
+        mockMvc
+            .perform(
+                post("/api/v1/tasks")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"title\":\"Lifecycle task\",\"priority\":4}"))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.success").value(true))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    String id = JsonPath.read(createdBody, "$.data.id");
+
+    mockMvc
+        .perform(get("/api/v1/tasks/{id}", id))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.title").value("Lifecycle task"));
+
+    mockMvc
+        .perform(
+            patch("/api/v1/tasks/{id}", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"status\":\"COMPLETED\"}"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.data.title").value("Lifecycle task"))
+        .andExpect(jsonPath("$.data.status").value("COMPLETED"));
+
+    mockMvc
+        .perform(delete("/api/v1/tasks/{id}", id))
+        .andExpect(status().isNoContent())
+        .andExpect(content().string(""));
+
+    mockMvc
+        .perform(get("/api/v1/tasks/{id}", id))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error").value("NotFoundError"));
   }
 }

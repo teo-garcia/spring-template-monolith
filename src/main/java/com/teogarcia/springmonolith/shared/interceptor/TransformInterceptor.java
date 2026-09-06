@@ -19,9 +19,9 @@ import com.teogarcia.springmonolith.shared.filter.RequestIdFilter;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
- * Wraps every non-health/metrics/docs response in the portfolio success envelope: {success,
- * statusCode, timestamp, path, method, data, meta{requestId, version, duration}} Mirrors Nest
- * TransformInterceptor.
+ * Wraps every response with a body, except health/metrics/docs, in the portfolio success envelope:
+ * {success, statusCode, timestamp, path, method, data, meta{requestId, version, duration}} Mirrors
+ * Nest TransformInterceptor.
  */
 @RestControllerAdvice
 public class TransformInterceptor implements ResponseBodyAdvice<Object> {
@@ -46,6 +46,11 @@ public class TransformInterceptor implements ResponseBodyAdvice<Object> {
       Class<? extends HttpMessageConverter<?>> selectedConverterType,
       ServerHttpRequest request,
       ServerHttpResponse response) {
+    if (response
+            instanceof org.springframework.http.server.ServletServerHttpResponse servletResponse
+        && servletResponse.getServletResponse().getStatus() == 204) {
+      return null;
+    }
     String path = request.getURI().getPath();
     if (path.equals("/metrics")
         || path.startsWith("/health")
