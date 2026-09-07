@@ -111,6 +111,14 @@ automatically. Application settings are validated at boot through
 `@ConfigurationProperties`; datasource settings fail fast when the connection
 pool starts. `DATABASE_URL` is the canonical database address.
 
+### Container Releases
+
+Pushing a `vX.Y.Z` tag verifies the production image, then publishes semver tags
+to `ghcr.io/<owner>/<repository>` with an SBOM and provenance attestation. Run
+`make db-deploy` as a separate pre-deploy step. Roll back application code by
+deploying a prior immutable image digest; keep database changes compatible with
+both versions.
+
 ---
 
 ## Observability
