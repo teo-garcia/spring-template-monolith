@@ -102,6 +102,17 @@ Production migrations must be backward-compatible. Expand-contract: add nullable
 
 `make db-deploy` is idempotent. Rollback is backup restore + compatible code, or forward-fix migration. `make db-reset` (`flyway:clean`) is local/test-only.
 
+The production image also contains a finite migration entry point for schedulers
+such as an ECS one-off task:
+
+```bash
+java -Dloader.main=com.teogarcia.springmonolith.MigrationApplication \
+  -cp app.jar org.springframework.boot.loader.launch.PropertiesLauncher
+```
+
+Run that command from the same immutable image digest before rolling out the new
+service revision.
+
 ---
 
 ## Environment
