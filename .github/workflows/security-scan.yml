@@ -1,4 +1,5 @@
 name: Security Scan
+
 on:
   push:
     branches: [main]
@@ -6,27 +7,16 @@ on:
     branches: [main]
   schedule:
     - cron: "0 0 1 * *"
-permissions:
-  contents: read
-  security-events: write
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  trivy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          scan-type: fs
-          scan-ref: .
-          format: sarif
-          output: trivy-results.sarif
-      - uses: github/codeql-action/upload-sarif@v4
-        if: always()
-        with:
-          sarif_file: trivy-results.sarif
-  dependency-review:
-    runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/dependency-review-action@v5.0.0
+  shared-security:
+    name: Shared security policy
+    permissions:
+      contents: read
+      security-events: write
+    uses: teo-garcia/templates/.github/workflows/reusable-security.yml@02a8caa55d7b43f53f8811bb2d644dd90e73a940 # delivery-v0.1.0

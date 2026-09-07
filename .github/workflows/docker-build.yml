@@ -8,52 +8,14 @@ on:
     tags: ["v*"]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - name: Build image (no push)
-        run: docker build -f docker/Dockerfile -t spring-template-monolith:ci .
-      - name: Record image Java runtime
-        run: docker run --rm spring-template-monolith:ci java -version
-      - name: Start smoke dependencies
-        run: |
-          docker network create spring-smoke
-          docker run -d --name spring-smoke-db --network spring-smoke \
-            -e POSTGRES_USER=postgres \
-            -e POSTGRES_PASSWORD=postgres \
-            -e POSTGRES_DB=spring_monolith \
-            -v "$PWD/src/main/resources/db/migration:/docker-entrypoint-initdb.d:ro" \
-            postgres:18-alpine
-          for _ in $(seq 1 60); do
-            if docker exec spring-smoke-db pg_isready -U postgres; then
-              exit 0
-            fi
-            sleep 1
-          done
-          docker logs spring-smoke-db
-          exit 1
-      - name: Start production image
-        run: |
-          docker run -d --name spring-smoke-app --network spring-smoke -p 3000:3000 \
-            -e APP_ENV=production \
-            -e SPRING_PROFILES_ACTIVE=production \
-            -e DATABASE_URL=jdbc:postgresql://spring-smoke-db:5432/spring_monolith \
-            -e DATABASE_USER=postgres \
-            -e DATABASE_PASSWORD=postgres \
-            -e OTEL_ENABLED=false \
-            spring-template-monolith:ci
-          for _ in $(seq 1 60); do
-            if curl --fail --silent http://127.0.0.1:3000/health/live; then
-              exit 0
-            fi
-            sleep 1
-          done
-          docker logs spring-smoke-app
-          exit 1
-      - name: Stop smoke containers
-        if: always()
-        run: |
-          docker rm -f spring-smoke-app spring-smoke-db 2>/dev/null || true
-          docker network rm spring-smoke 2>/dev/null || true
+  verify:
+    name: Verify production image
+    uses: teo-garcia/templates/.github/workflows/reusable-container-verification.yml@02a8caa55d7b43f53f8811bb2d644dd90e73a940 # delivery-v0.1.0
