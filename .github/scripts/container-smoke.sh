@@ -24,14 +24,17 @@ docker run --detach --name spring-smoke-db \
   --volume "$PWD/src/main/resources/db/migration:/docker-entrypoint-initdb.d:ro" \
   postgres:18-alpine
 
+database_ready=false
 for _ in $(seq 1 60); do
-  if docker exec spring-smoke-db pg_isready -U postgres; then
+  if docker logs spring-smoke-db 2>&1 | grep --quiet "PostgreSQL init process complete" &&
+    docker exec spring-smoke-db pg_isready -U postgres -d spring_monolith >/dev/null; then
+    database_ready=true
     break
   fi
   sleep 1
 done
 
-if ! docker exec spring-smoke-db pg_isready -U postgres; then
+if [[ $database_ready != true ]]; then
   docker logs spring-smoke-db
   exit 1
 fi
