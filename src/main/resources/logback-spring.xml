@@ -21,7 +21,11 @@
       <encoder class="net.logstash.logback.encoder.LogstashEncoder">
         <includeMdcKeyName>requestId</includeMdcKeyName>
         <includeMdcKeyName>method</includeMdcKeyName>
-        <includeMdcKeyName>path</includeMdcKeyName>
+        <includeMdcKeyName>route</includeMdcKeyName>
+        <includeMdcKeyName>status</includeMdcKeyName>
+        <includeMdcKeyName>duration_ms</includeMdcKeyName>
+        <includeMdcKeyName>trace_id</includeMdcKeyName>
+        <includeMdcKeyName>span_id</includeMdcKeyName>
         <customFields>{"service":"${serviceName}"}</customFields>
       </encoder>
     </appender>

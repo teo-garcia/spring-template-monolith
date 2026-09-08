@@ -4,6 +4,7 @@ import java.time.Duration;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.HandlerMapping;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -23,18 +24,8 @@ public class MetricsInterceptor implements HandlerInterceptor {
   @Override
   public void afterCompletion(
       HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-    String route = request.getRequestURI();
-    // Cardinality guard: collapse unmatched routes to UNKNOWN (mirrors Adonis fix in PARITY.md)
-    if (route.startsWith("/api/")) {
-      // keep as-is for known API routes
-    } else if (route.equals("/health")
-        || route.startsWith("/health/")
-        || route.equals("/metrics")
-        || route.startsWith("/docs")) {
-      // keep health/metrics/docs separate
-    } else if (!route.equals("/")) {
-      route = "UNKNOWN";
-    }
+    Object matchedPattern = request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+    String route = matchedPattern == null ? "UNKNOWN" : matchedPattern.toString();
     Counter.builder("http_requests_total")
         .tag("method", request.getMethod())
         .tag("route", route)

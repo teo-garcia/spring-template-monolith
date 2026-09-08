@@ -5,7 +5,10 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.HandlerMapping;
 
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.SpanContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -18,7 +21,6 @@ public class LoggingInterceptor implements HandlerInterceptor {
   public boolean preHandle(
       HttpServletRequest request, HttpServletResponse response, Object handler) {
     MDC.put("method", request.getMethod());
-    MDC.put("path", request.getRequestURI());
     request.setAttribute("_start", System.nanoTime());
     return true;
   }
@@ -28,13 +30,25 @@ public class LoggingInterceptor implements HandlerInterceptor {
       HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
     Long start = (Long) request.getAttribute("_start");
     long durationMs = start != null ? (System.nanoTime() - start) / 1_000_000 : -1;
-    log.info(
-        "{} {} {} {}ms",
-        request.getMethod(),
-        request.getRequestURI(),
-        response.getStatus(),
-        durationMs);
-    MDC.remove("method");
-    MDC.remove("path");
+    Object matchedPattern = request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+    String route = matchedPattern == null ? "UNKNOWN" : matchedPattern.toString();
+    SpanContext spanContext = Span.current().getSpanContext();
+    try {
+      MDC.put("route", route);
+      MDC.put("status", String.valueOf(response.getStatus()));
+      MDC.put("duration_ms", String.valueOf(durationMs));
+      if (spanContext.isValid()) {
+        MDC.put("trace_id", spanContext.getTraceId());
+        MDC.put("span_id", spanContext.getSpanId());
+      }
+      log.info("{} {} {} {}ms", request.getMethod(), route, response.getStatus(), durationMs);
+    } finally {
+      MDC.remove("method");
+      MDC.remove("route");
+      MDC.remove("status");
+      MDC.remove("duration_ms");
+      MDC.remove("trace_id");
+      MDC.remove("span_id");
+    }
   }
 }

@@ -134,8 +134,10 @@ both versions.
 
 ## Observability
 
-- Plain local logs and JSON production logs via `logstash-logback-encoder`; `LOG_LEVEL`
-  controls application verbosity without enabling debug logs for the whole framework
+- Plain local logs and JSON production logs via `logstash-logback-encoder`; request
+  events carry normalized route, status, duration, request ID, and active trace/span
+  IDs. `LOG_LEVEL` controls application verbosity without enabling debug logs for the
+  whole framework
 - `X-Request-ID` header round-trips; error `meta.requestId` mirrors it
 - Micrometer Prometheus at `/metrics`, histogram buckets for p95/p99 (via `MetricsInterceptor`)
 - OTel traces via Spring Boot's OpenTelemetry starter
