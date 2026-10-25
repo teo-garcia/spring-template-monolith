@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: "0 0 1 * *"
+    - cron: "0 9 * * 1"
   workflow_dispatch:
 
 concurrency:
@@ -20,3 +20,20 @@ jobs:
       contents: read
       security-events: write
     uses: teo-garcia/templates/.github/workflows/reusable-security.yml@e0aa52f1d25edeac907bf1dcf2243af4d958e5e0 # delivery-v0.2.0
+    with:
+      fail-on-findings: true
+
+  security:
+    name: Security
+    if: always()
+    needs: [shared-security]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Require successful security checks
+        env:
+          SHARED_SECURITY_RESULT: ${{ needs.shared-security.result }}
+        run: |
+          test "$SHARED_SECURITY_RESULT" = success
